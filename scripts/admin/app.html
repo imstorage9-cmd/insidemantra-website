@@ -65,6 +65,12 @@
         font-size: 14px; box-shadow: 0 8px 30px rgba(0,0,0,.2); opacity: 0; pointer-events: none; transition: .2s; max-width: 90vw; }
       #toast.show { opacity: 1; }
       #toast.error { background: #a12f20; }
+      .danger { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-top: 36px; padding: 22px 24px;
+        border: 1px solid #e8c4bd; border-radius: 18px; background: #fff; }
+      .danger form { flex-basis: 100%; }
+      .danger-btn { background: #a12f20; }
+      .danger-btn:hover { background: #7f2418; }
+      .danger-btn:disabled { background: #d9b1aa; cursor: not-allowed; }
       .note { margin-top: 36px; padding: 16px 18px; border-radius: 14px; background: var(--surface); font-size: 14px; color: var(--muted); }
       [hidden] { display: none !important; }
     </style>
@@ -74,7 +80,7 @@
       <strong>Inside Mantra · Photo admin</strong>
       <nav>
         <a href="http://localhost:3000/the-works/" target="_blank" rel="noopener">View website ↗</a>
-        <form method="post" action="/logout" style="margin: 0"><button class="btn ghost small" type="submit">Log out</button></form>
+        <form method="post" action="/admin/logout/" style="margin: 0"><button class="btn ghost small" type="submit">Log out</button></form>
       </nav>
     </header>
 
@@ -166,6 +172,23 @@
           Photos show up on the website preview straight away (<a href="http://localhost:3000/the-works/" target="_blank" rel="noopener">localhost:3000</a>,
           if <code>npm run dev</code> is running). To put them on the live website, publish the changes (see README → “Publishing”).
         </div>
+
+        <div class="danger">
+          <div>
+            <h2>Delete this project</h2>
+            <p class="muted" style="margin: 4px 0 0">Removes the project and all its photos from the website. This can't be undone.</p>
+          </div>
+          <button class="btn danger-btn" type="button" id="delete-open">Delete project…</button>
+          <form id="delete-form" hidden>
+            <p id="delete-warning" style="margin: 0 0 10px"></p>
+            <label for="delete-confirm" style="margin-top: 0">Type the project name to confirm</label>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap">
+              <input id="delete-confirm" autocomplete="off" style="max-width: 360px" />
+              <button class="btn danger-btn" type="submit" id="delete-submit" disabled>Delete forever</button>
+              <button class="btn ghost" type="button" id="delete-cancel">Cancel</button>
+            </div>
+          </form>
+        </div>
       </section>
     </main>
 
@@ -187,8 +210,11 @@
         toast.timer = setTimeout(() => (t.className = ""), isError ? 6000 : 2500);
       }
 
+      // "/api/projects?x=1" -> "/admin/api/projects/?x=1" (prefix + trailing slash, so the preview on :3000 forwards it without a redirect)
+      const apiUrl = (url) => { const [path, query] = url.split("?"); return `/admin${path}/${query ? `?${query}` : ""}`; };
+
       async function api(method, url, body, headers = {}) {
-        const res = await fetch(url, {
+        const res = await fetch(apiUrl(url), {
           method,
           headers: body instanceof Blob ? headers : { "Content-Type": "application/json", ...headers },
           body: body === undefined ? undefined : body instanceof Blob ? body : JSON.stringify(body),
@@ -245,6 +271,7 @@
       function showProject(p) {
         current = p;
         closeNameEditor();
+        closeDelete();
         $("#choose").hidden = true;
         $("#project").hidden = false;
         $("#p-title").textContent = p.title;
@@ -294,7 +321,7 @@
             const thumbs = room.photos
               .map((f) => `<div class="thumb">
                   ${current.cover === f ? '<span class="badge">Cover</span>' : ""}
-                  <img src="/photos/${esc(current.slug)}/${encodeURIComponent(f)}" alt="" loading="lazy">
+                  <img src="/admin/photos/${esc(current.slug)}/${encodeURIComponent(f)}" alt="" loading="lazy">
                   <div class="actions">
                     <button type="button" data-cover="${esc(f)}">${current.cover === f ? "Unset cover" : "Set as cover"}</button>
                     <button type="button" class="del" data-room="${id}" data-del="${esc(f)}">Remove</button>
@@ -427,12 +454,44 @@
           toast("Room added. Now drop its photos in.");
         } catch (err) { toast(err.message, true); }
       });
-      $("#back").addEventListener("click", async () => {
+      async function backToList() {
         current = null;
-        history.replaceState(null, "", "/");
+        closeDelete();
+        history.replaceState(null, "", "/admin/");
         $("#project").hidden = true;
         $("#choose").hidden = false;
         await loadProjects();
+      }
+      $("#back").addEventListener("click", backToList);
+
+      // Delete project: must type the exact project name before the button unlocks.
+      function closeDelete() {
+        $("#delete-form").hidden = true;
+        $("#delete-open").hidden = false;
+        $("#delete-confirm").value = "";
+        $("#delete-submit").disabled = true;
+      }
+      $("#delete-open").addEventListener("click", () => {
+        const n = current.rooms.reduce((sum, r) => sum + r.photos.length, 0);
+        $("#delete-warning").innerHTML =
+          `This permanently deletes <b>${esc(current.title)}</b> and its <b>${n} photo${n === 1 ? "" : "s"}</b>.`;
+        $("#delete-open").hidden = true;
+        $("#delete-form").hidden = false;
+        $("#delete-confirm").focus();
+      });
+      $("#delete-confirm").addEventListener("input", (e) => {
+        $("#delete-submit").disabled = e.target.value.trim() !== current.title;
+      });
+      $("#delete-cancel").addEventListener("click", closeDelete);
+      $("#delete-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if ($("#delete-confirm").value.trim() !== current.title) return;
+        const title = current.title;
+        try {
+          await api("DELETE", `/api/projects/${current.slug}`);
+          await backToList();
+          toast(`Deleted “${title}”`);
+        } catch (err) { toast(err.message, true); }
       });
 
       // Start: reopen the project from the URL (#slug) after a refresh, otherwise show step 1.

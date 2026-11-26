@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { ImageIcon } from "lucide-react";
-import { resolveImage } from "@/lib/images";
+import { PLACEHOLDER_SLOT, resolveImage } from "@/lib/images";
 
 type ImageSlotProps = {
   slot: string; // path under public/images/, without extension
@@ -10,17 +10,28 @@ type ImageSlotProps = {
   preload?: boolean;
 };
 
+const isDev = process.env.NODE_ENV === "development";
+
 /**
- * Renders public/images/<slot>.* if it exists, otherwise a labelled placeholder
- * telling the editor exactly where to drop the file. The parent sets the size.
+ * Renders public/images/<slot>.* if it exists. Otherwise falls back to the shared
+ * placeholder photo (public/images/placeholder.jpg) and, in the local preview only,
+ * labels it with the file name this spot is waiting for. The parent sets the size.
  */
 export function ImageSlot({ slot, alt, className = "", sizes = "100vw", preload }: ImageSlotProps) {
-  const src = resolveImage(slot);
+  const own = resolveImage(slot);
+  const src = own ?? resolveImage(PLACEHOLDER_SLOT);
 
   return (
     <div className={`relative overflow-hidden bg-surface ${className}`}>
       {src ? (
-        <Image src={src} alt={alt} fill sizes={sizes} preload={preload} className="object-cover" />
+        <>
+          <Image src={src} alt={alt} fill sizes={sizes} preload={preload} className="object-cover" />
+          {!own && isDev && (
+            <span className="absolute bottom-2 left-2 max-w-[calc(100%-1rem)] truncate rounded-md bg-black/60 px-2 py-1 font-mono text-[10px] text-white">
+              placeholder · add public/images/{slot}.jpg
+            </span>
+          )}
+        </>
       ) : (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 border border-dashed border-[#cbbda8] bg-[#e9e1d4] p-4 text-center text-muted [border-radius:inherit]">
           <ImageIcon size={28} strokeWidth={1.25} aria-hidden />

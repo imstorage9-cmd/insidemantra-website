@@ -16,6 +16,11 @@ const PROJECTS_DIR = path.join(ROOT, "public", "projects");
 const UI_DIR = path.join(ROOT, "scripts", "admin");
 const HOST = "127.0.0.1"; // this computer only
 const PORT = Number(process.env.ADMIN_PORT) || 3001;
+const BASE = "/admin"; // URL prefix; the preview forwards localhost:3000/admin/* here
+const SITE_PORT = 3000; // `npm run dev`
+const ALLOWED_ORIGINS = new Set(
+  [PORT, SITE_PORT].flatMap((port) => [`http://localhost:${port}`, `http://127.0.0.1:${port}`])
+);
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 const SESSION_HOURS = 12;
 
@@ -177,10 +182,18 @@ const today = () => new Date().toISOString().slice(0, 10);
 // ── Routes ────────────────────────────────────────────────────────────────
 async function handle(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
-  const p = url.pathname;
+
+  // Everything lives under /admin/, so it works both directly (localhost:3001/admin/) and through
+  // the website preview, which forwards localhost:3000/admin/* here (see next.config.ts).
+  if (!(url.pathname + "/").startsWith(BASE + "/")) {
+    if (req.method === "GET") return send(res, 302, "", { Location: `${BASE}/` });
+    throw httpError(404, "Not found");
+  }
+  let p = url.pathname.slice(BASE.length) || "/";
+  if (p.length > 1 && p.endsWith("/")) p = p.slice(0, -1); // the preview adds trailing slashes
 
   // Same-origin check for every state-changing request (blocks other websites posting here).
-  if (req.method !== "GET" && req.headers.origin && req.headers.origin !== `http://${req.headers.host}`) {
+  if (req.method !== "GET" && req.headers.origin && !ALLOWED_ORIGINS.has(req.headers.origin)) {
     throw httpError(403, "Forbidden");
   }
 
@@ -188,13 +201,13 @@ async function handle(req, res) {
     const form = new URLSearchParams((await readBody(req, 4096)).toString("utf-8"));
     if (!passwordMatches(form.get("password") ?? "")) {
       await new Promise((r) => setTimeout(r, 800)); // slow down guessing
-      return send(res, 303, "", { Location: "/?error=1" });
+      return send(res, 303, "", { Location: `${BASE}/?error=1` });
     }
     const token = crypto.randomBytes(32).toString("hex");
     sessions.set(token, Date.now() + SESSION_HOURS * 3600_000);
     return send(res, 303, "", {
-      Location: "/",
-      "Set-Cookie": `im_admin=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${SESSION_HOURS * 3600}`,
+      Location: `${BASE}/`,
+      "Set-Cookie": `im_admin=${token}; HttpOnly; SameSite=Strict; Path=${BASE}; Max-Age=${SESSION_HOURS * 3600}`,
     });
   }
 
@@ -206,7 +219,7 @@ async function handle(req, res) {
 
   if (req.method === "POST" && p === "/logout") {
     sessions.delete(session);
-    return send(res, 303, "", { Location: "/", "Set-Cookie": "im_admin=; Path=/; Max-Age=0" });
+    return send(res, 303, "", { Location: `${BASE}/`, "Set-Cookie": `im_admin=; Path=${BASE}; Max-Age=0` });
   }
   if (req.method === "GET" && p === "/") return send(res, 200, page("app.html"));
 
@@ -276,6 +289,18 @@ async function handle(req, res) {
     return send(res, 200, summary(newSlug, data));
   }
 
+  // Delete the whole project: its folder, details and all photos (permanent)
+  if (req.method === "DELETE" && sub === "") {
+    try {
+      fs.rmSync(projectDir(slug), { recursive: true, force: true });
+    } catch (err) {
+      console.error(err);
+      throw httpError(409, "Couldn't delete the project folder. It may be open in another program. Close it and try again.");
+    }
+    console.log(`  Deleted project: ${slug}`);
+    return send(res, 200, { deleted: slug });
+  }
+
   // Add an extra room (Pooja Room, Balcony, ...)
   if (req.method === "POST" && sub === "/rooms") {
     const name = String((await readJson(req)).name ?? "").trim().replace(/\s+/g, " ");
@@ -337,5 +362,5 @@ http
     });
   })
   .listen(PORT, HOST, () => {
-    console.log(`\n  Inside Mantra photo admin → http://localhost:${PORT}\n  Saving into ${PROJECTS_DIR}\n`);
+    console.log(`\n  Inside Mantra photo admin → http://localhost:${SITE_PORT}/admin/  (or http://localhost:${PORT}/admin/)\n  Saving into ${PROJECTS_DIR}\n`);
   });

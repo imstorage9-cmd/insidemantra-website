@@ -5,7 +5,7 @@ import { siteConfig } from "@/config/site";
 // The photo admin (`npm run admin`) only runs on this computer, so its link is shown
 // in the local preview (`npm run dev`) and left out of the published build.
 const showAdminLink = process.env.NODE_ENV === "development";
-const ADMIN_URL = "http://localhost:3001";
+const ADMIN_URL = "/admin/"; // forwarded to the admin server by next.config.ts (dev only)
 
 const socialLabels: Record<string, string> = {
   facebook: "Facebook",

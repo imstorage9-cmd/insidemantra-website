@@ -11,7 +11,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { siteConfig } from "@/config/site";
-import { resolveImage } from "@/lib/images";
+import { PLACEHOLDER_SLOT, resolveImage } from "@/lib/images";
 import { getProjects } from "@/lib/projects";
 import { ImageSlot } from "@/components/image-slot";
 import { ProjectCard } from "@/components/project-card";
@@ -47,9 +47,12 @@ export default function Home() {
     contact,
   } = siteConfig;
 
-  const heroImages = Array.from({ length: hero.slideCount }, (_, i) => resolveImage(`hero/slide-${i + 1}`)).filter(
+  const heroSlides = Array.from({ length: hero.slideCount }, (_, i) => resolveImage(`hero/slide-${i + 1}`)).filter(
     (src): src is string => src !== null
   );
+  // No hero photos yet → show the shared placeholder photo instead of a blank banner.
+  const placeholder = resolveImage(PLACEHOLDER_SLOT);
+  const heroImages = heroSlides.length ? heroSlides : placeholder ? [placeholder] : [];
   const realStats = stats.filter((s) => !isPlaceholder(s.value));
   const realTrophies = trophies.filter((t) => !isPlaceholder(t.title));
   const recentProjects = getProjects().slice(0, 3);

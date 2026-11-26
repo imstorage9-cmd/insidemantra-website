@@ -36,7 +36,7 @@ Then open http://localhost:3000.
 | `npm run build` | Builds the static site into `out/` |
 | `npm run start` | Runs `next start`. This isn't needed for a static export: serve `out/` instead |
 | `npm run lint` | Runs ESLint |
-| `npm run admin` | Starts the photo admin at http://localhost:3001 (see "Uploading project photos") |
+| `npm run admin` | Starts the photo admin, opened at http://localhost:3000/admin/ (see "Uploading project photos") |
 
 ## Project structure
 
@@ -86,6 +86,8 @@ The slot names come from `config/site.ts`:
 
 Example: to add the first hero image, save it as `public/images/hero/slide-1.jpg`.
 
+**Placeholder photo:** any spot without its own photo shows `public/images/placeholder.jpg` instead. In the local preview (`npm run dev`), each of those spots has a small label naming the file it's waiting for. Visitors to the published site don't see these labels. When you add a real photo with that file name, it replaces the placeholder in that spot.
+
 > Images are found **at build time**. After you add or remove an image, restart `npm run dev` or run `npm run build` again.
 
 ## Uploading project photos
@@ -106,10 +108,12 @@ Then start the website preview and the admin, each in its own terminal:
 
 ```bash
 npm run dev      # website preview → http://localhost:3000
-npm run admin    # photo admin     → http://localhost:3001
+npm run admin    # photo admin (runs in the background on port 3001)
 ```
 
-Open http://localhost:3001 and log in with the password.
+Open **http://localhost:3000/admin/**, or click **Admin login** at the bottom of any page, and log in with the password.
+
+The preview forwards `/admin/` to the admin server. This is set up in `next.config.ts` and only happens in `npm run dev`; the published build has no admin. If the preview isn't running, you can also open the admin directly at http://localhost:3001/admin/.
 
 The admin only accepts connections from this computer. A login lasts 12 hours, or until the admin is restarted.
 
@@ -125,6 +129,7 @@ The admin only accepts connections from this computer. A login lasts 12 hours, o
 - For another room, type its name next to **+ Add room** (for example "Pooja Room"), then drop its photos in.
 - Hover over a photo to **Set as cover** (the photo shown on the project card) or **Remove** it.
 - Click **Edit name** next to the project title to rename the project, for example to fix a typo.
+- To delete a whole project, use **Delete this project** at the bottom of its page. You have to type the project name to confirm. This removes the folder and all its photos, and it can't be undone, unless the project was already pushed to GitHub.
 
 Photos show up on the preview at http://localhost:3000 straight away. To put them on the live website, see [Publishing](#publishing).
 
