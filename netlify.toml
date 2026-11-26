@@ -1,0 +1,8 @@
+# Netlify builds the static site and serves the out/ folder.
+# Every photo upload in /admin saves to GitHub, which triggers a rebuild automatically (~1–2 min).
+[build]
+  command = "npm run build"
+  publish = "out"
+
+[build.environment]
+  NODE_VERSION = "22"
