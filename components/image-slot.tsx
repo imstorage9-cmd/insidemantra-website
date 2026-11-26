@@ -8,6 +8,8 @@ type ImageSlotProps = {
   className?: string;
   sizes?: string;
   preload?: boolean;
+  /** Zoom the photo when a parent with the `group` class is hovered */
+  zoomOnHover?: boolean;
 };
 
 const isDev = process.env.NODE_ENV === "development";
@@ -17,7 +19,7 @@ const isDev = process.env.NODE_ENV === "development";
  * placeholder photo (public/images/placeholder.jpg) and, in the local preview only,
  * labels it with the file name this spot is waiting for. The parent sets the size.
  */
-export function ImageSlot({ slot, alt, className = "", sizes = "100vw", preload }: ImageSlotProps) {
+export function ImageSlot({ slot, alt, className = "", sizes = "100vw", preload, zoomOnHover }: ImageSlotProps) {
   const own = resolveImage(slot);
   const src = own ?? resolveImage(PLACEHOLDER_SLOT);
 
@@ -25,9 +27,16 @@ export function ImageSlot({ slot, alt, className = "", sizes = "100vw", preload 
     <div className={`relative overflow-hidden bg-surface ${className}`}>
       {src ? (
         <>
-          <Image src={src} alt={alt} fill sizes={sizes} preload={preload} className="object-cover" />
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            sizes={sizes}
+            preload={preload}
+            className={`object-cover ${zoomOnHover ? "transition-transform duration-700 ease-out group-hover:scale-110" : ""}`}
+          />
           {!own && isDev && (
-            <span className="absolute bottom-2 left-2 max-w-[calc(100%-1rem)] truncate rounded-md bg-black/60 px-2 py-1 font-mono text-[10px] text-white">
+            <span className="absolute top-2 left-2 z-10 max-w-[calc(100%-1rem)] truncate rounded-md bg-black/60 px-2 py-1 font-mono text-[10px] text-white">
               placeholder · add public/images/{slot}.jpg
             </span>
           )}

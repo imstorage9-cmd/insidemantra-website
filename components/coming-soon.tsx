@@ -8,8 +8,8 @@ export function ComingSoon({ title }: { title: string }) {
 
   return (
     <section className="mx-auto flex max-w-3xl flex-col items-center px-5 py-24 text-center sm:py-32">
-      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">{title}</p>
-      <h1 className="mt-4 font-display text-5xl leading-tight font-semibold sm:text-6xl">This page is being built</h1>
+      <p className="text-xs font-display font-semibold uppercase tracking-[0.25em] text-accent">{title}</p>
+      <h1 className="mt-4 font-display text-5xl leading-tight font-normal tracking-tight sm:text-6xl">This page is being built</h1>
       <p className="mt-5 max-w-xl text-lg leading-8 text-muted">
         Stay tuned. We’re putting the finishing touches on it. In the meantime, we’d love to hear about your space.
       </p>
@@ -17,7 +17,7 @@ export function ComingSoon({ title }: { title: string }) {
       <div className="mt-10 flex flex-wrap justify-center gap-3">
         <a
           href={`tel:${contact.phoneDialable}`}
-          className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 font-medium text-white transition-colors hover:bg-accent-strong"
+          className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 font-semibold text-charcoal transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-strong hover:shadow-lg hover:shadow-brand/30"
         >
           <Phone size={18} /> {contact.phone}
         </a>

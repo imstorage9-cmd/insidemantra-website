@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, MapPin } from "lucide-react";
 import { getProject, getProjects } from "@/lib/projects";
 import { siteConfig } from "@/config/site";
+import { delay } from "@/lib/motion";
 
 // Static export: one page per project folder, generated at build time. Unknown slugs 404.
 export const dynamicParams = false;
@@ -37,7 +38,7 @@ export default async function ProjectPage({ params }: PageProps<"/the-works/[slu
       </Link>
 
       <header className="mt-6 max-w-3xl">
-        <h1 className="font-display text-5xl leading-tight font-semibold sm:text-6xl">{project.title}</h1>
+        <h1 className="font-display text-5xl leading-tight font-normal tracking-tight sm:text-6xl">{project.title}</h1>
         {project.location && (
           <p className="mt-3 inline-flex items-center gap-1.5 text-muted">
             <MapPin size={16} aria-hidden /> {project.location}
@@ -62,7 +63,7 @@ export default async function ProjectPage({ params }: PageProps<"/the-works/[slu
 
       {project.rooms.map((room) => (
         <section key={room.id} id={room.id} className="mt-14 scroll-mt-24">
-          <h2 className="border-b border-line pb-3 font-display text-3xl font-semibold">{room.label}</h2>
+          <h2 className="border-b border-line pb-3 font-display text-3xl font-normal tracking-tight">{room.label}</h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {room.photos.map((src, i) => (
               <a
@@ -70,7 +71,9 @@ export default async function ProjectPage({ params }: PageProps<"/the-works/[slu
                 href={src}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`relative block overflow-hidden rounded-xl bg-surface ${
+                data-reveal
+                style={delay((i % 2) * 100)}
+                className={`group relative block overflow-hidden rounded-xl bg-surface shadow-sm transition-shadow duration-500 hover:shadow-2xl hover:shadow-black/15 ${
                   room.photos.length % 2 === 1 && i === 0 ? "aspect-[16/9] sm:col-span-2" : "aspect-[4/3]"
                 }`}
               >
@@ -79,7 +82,7 @@ export default async function ProjectPage({ params }: PageProps<"/the-works/[slu
                   alt={`${room.label}, ${project.title}`}
                   fill
                   sizes="(min-width: 640px) 50vw, 100vw"
-                  className="object-cover"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
               </a>
             ))}
@@ -88,10 +91,10 @@ export default async function ProjectPage({ params }: PageProps<"/the-works/[slu
       ))}
 
       <div className="mt-20 flex flex-wrap items-center justify-between gap-6 rounded-2xl bg-surface p-8 sm:p-10">
-        <p className="font-display text-3xl font-semibold">Want something like this for your home?</p>
+        <p className="font-display text-3xl font-normal tracking-tight">Want something like this for your home?</p>
         <Link
           href={siteConfig.consultationHref}
-          className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 font-medium text-white hover:bg-accent-strong"
+          className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 font-semibold text-charcoal transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-strong hover:shadow-lg hover:shadow-brand/30"
         >
           {siteConfig.consultationCtaText} <ArrowRight size={18} />
         </Link>

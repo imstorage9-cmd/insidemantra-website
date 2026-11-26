@@ -67,6 +67,19 @@ export const siteConfig = {
     { label: "Contact", href: "/contact" },
   ],
 
+  // Rotating quotes on the home page (from the original Inside Mantra site)
+  philosophyQuotes: [
+    { label: "Our Philosophy", text: "No design is so arrogantly grand as that which is simple." },
+    { label: "What we think", text: "The key to great design is capturing the spirit of the client and the essence of the space." },
+    { label: "What we believe", text: "Design is not for philosophy, it's for life." },
+  ],
+
+  // "Be ___" banner: the last word cycles through these
+  beYou: {
+    lead: "Be faithful to your own taste, because nothing you really like is ever out of style.",
+    words: ["Different", "Creative", "Bold", "You!"],
+  },
+
   consultationCtaText: "Book Free Consultation",
   consultationHref: "/contact",
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getProjects } from "@/lib/projects";
 import { ProjectCard } from "@/components/project-card";
 import { siteConfig } from "@/config/site";
+import { delay } from "@/lib/motion";
 
 export const metadata: Metadata = {
   title: "The Works",
@@ -14,16 +15,18 @@ export default function TheWorksPage() {
 
   return (
     <section className="mx-auto max-w-6xl px-5 py-16 sm:py-24">
-      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">The works</p>
-      <h1 className="mt-3 font-display text-5xl font-semibold sm:text-6xl">Our projects</h1>
+      <p className="text-xs font-display font-semibold uppercase tracking-[0.25em] text-accent">The works</p>
+      <h1 className="mt-3 font-display text-5xl font-normal tracking-tight sm:text-6xl">Our projects</h1>
       <p className="mt-4 max-w-2xl leading-7 text-muted">
         A look inside homes we’ve designed and delivered, room by room.
       </p>
 
       {projects.length > 0 ? (
         <div className="mt-12 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((p) => (
-            <ProjectCard key={p.slug} project={p} />
+          {projects.map((p, i) => (
+            <div key={p.slug} data-reveal style={delay((i % 3) * 120)}>
+              <ProjectCard project={p} />
+            </div>
           ))}
         </div>
       ) : (

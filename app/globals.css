@@ -1,13 +1,16 @@
 @import "tailwindcss";
 
+/* Brand: amber hexagon + charcoal grey, taken from the Inside Mantra logo */
 :root {
-  --background: #faf7f2;
-  --foreground: #1f1b16;
-  --muted: #6b6258;
-  --surface: #f1ebe1;
-  --line: #e2d9cb;
-  --accent: #9a6a36;
-  --accent-strong: #7d5328;
+  --background: #ffffff;
+  --foreground: #2b2b2d;
+  --muted: #66666a;
+  --surface: #f6f4f0;
+  --line: #e7e3dc;
+  --brand: #faa831; /* logo amber – fills, buttons, highlights */
+  --brand-strong: #f29a16;
+  --accent: #a0600a; /* darker amber – readable text & icons on light backgrounds */
+  --charcoal: #232325;
 }
 
 @theme inline {
@@ -16,8 +19,10 @@
   --color-muted: var(--muted);
   --color-surface: var(--surface);
   --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
   --color-accent: var(--accent);
-  --color-accent-strong: var(--accent-strong);
+  --color-charcoal: var(--charcoal);
   --font-sans: var(--font-body);
   --font-display: var(--font-display);
 }
@@ -29,4 +34,122 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+::selection {
+  background: var(--brand);
+  color: var(--charcoal);
+}
+
+/* ── Scroll reveal ───────────────────────────────────────────────────────
+   Elements with data-reveal start hidden and animate in when scrolled into view
+   (components/reveal-observer.tsx adds .is-visible). Only applies when JS runs
+   (html.js is set by an inline script in the layout), so content is never lost. */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--delay, 0ms);
+}
+.js [data-reveal="left"] {
+  transform: translateX(-36px);
+}
+.js [data-reveal="right"] {
+  transform: translateX(36px);
+}
+.js [data-reveal="zoom"] {
+  transform: scale(0.94);
+}
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Keyframes ──────────────────────────────────────────────────────────── */
+@keyframes kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.12);
+  }
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+@keyframes scroll-cue {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 0.4;
+  }
+}
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-kenburns {
+  animation: kenburns 18s ease-out both;
+}
+.animate-fade-up {
+  animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+.animate-pulse-ring {
+  animation: pulse-ring 2.2s ease-out infinite;
+}
+.animate-scroll-cue {
+  animation: scroll-cue 1.8s ease-in-out infinite;
+}
+.animate-spin-slow {
+  animation: spin-slow 40s linear infinite;
+}
+
+/* Hexagon clip used for icon badges (echoes the logo) */
+.hexagon {
+  clip-path: polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%);
+}
+
+/* Respect "reduce motion": show everything, no movement */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

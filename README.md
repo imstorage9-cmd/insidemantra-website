@@ -4,6 +4,18 @@ Marketing website for **Inside Mantra**, an interior design studio (modular inte
 
 The site is built with Next.js and exported as plain static files, so it can be hosted anywhere that serves HTML: Netlify, Vercel, GitHub Pages, S3 or a regular web host.
 
+## Quick links (this computer)
+
+Start both with `npm run dev` and `npm run admin`, each in its own terminal.
+
+| What | Address |
+|---|---|
+| Website preview | http://localhost:3000 |
+| **Photo admin** (add or edit projects) | **http://localhost:3000/admin/** |
+| Photo admin, if the preview isn't running | http://localhost:3001/admin/ |
+
+The admin password is in the `.env.local` file in the project folder. Details are under [Uploading project photos](#uploading-project-photos).
+
 > **Status:** work in progress. These are built: the home page, The Works (`/the-works/`), individual project pages, and a password-protected photo admin that runs on this computer (`npm run admin`). These pages show a "This page is being built" placeholder, with phone, WhatsApp and email links, until they're built: `/services`, `/magazine`, `/about`, `/contact` and `/offerings/<slug>` (see `components/coming-soon.tsx`). To build one, replace the `<ComingSoon />` in its `page.tsx`.
 
 ## Tech stack
@@ -111,7 +123,7 @@ npm run dev      # website preview → http://localhost:3000
 npm run admin    # photo admin (runs in the background on port 3001)
 ```
 
-Open **http://localhost:3000/admin/**, or click **Admin login** at the bottom of any page, and log in with the password.
+Open **http://localhost:3000/admin/** and log in with the password. The site has no link to the admin, so bookmark this address.
 
 The preview forwards `/admin/` to the admin server. This is set up in `next.config.ts` and only happens in `npm run dev`; the published build has no admin. If the preview isn't running, you can also open the admin directly at http://localhost:3001/admin/.
 
