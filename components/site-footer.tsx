@@ -1,5 +1,11 @@
 import Link from "next/link";
+import { Lock } from "lucide-react";
 import { siteConfig } from "@/config/site";
+
+// The photo admin (`npm run admin`) only runs on this computer, so its link is shown
+// in the local preview (`npm run dev`) and left out of the published build.
+const showAdminLink = process.env.NODE_ENV === "development";
+const ADMIN_URL = "http://localhost:3001";
 
 const socialLabels: Record<string, string> = {
   facebook: "Facebook",
@@ -63,8 +69,22 @@ export function SiteFooter() {
           </ul>
         </div>
       </div>
-      <div className="border-t border-white/10 py-5 text-center text-xs">
-        © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+      <div className="border-t border-white/10">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-5 text-xs">
+          <span>
+            © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+          </span>
+          {showAdminLink && (
+            <a
+              href={ADMIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mr-16 inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 hover:border-white/50 hover:text-white"
+            >
+              <Lock size={12} aria-hidden /> Admin login
+            </a>
+          )}
+        </div>
       </div>
     </footer>
   );

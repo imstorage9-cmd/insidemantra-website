@@ -119,7 +119,16 @@
         <div class="topline" style="margin-top: 14px">
           <div>
             <div class="step">Step 2 of 2 · Add photos</div>
-            <h1 id="p-title"></h1>
+            <div id="title-view" style="display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap">
+              <h1 id="p-title"></h1>
+              <button class="linkbtn" type="button" id="edit-name">Edit name</button>
+            </div>
+            <form id="title-form" hidden style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center">
+              <input id="title-input" maxlength="80" required aria-label="Project name" style="font: 600 24px Georgia, serif; max-width: 460px" />
+              <button class="btn" type="submit">Save</button>
+              <button class="btn ghost" type="button" id="cancel-name">Cancel</button>
+              <small class="muted" style="flex-basis: 100%">The project's web address changes to match the new name.</small>
+            </form>
           </div>
           <a class="btn ghost small" id="p-view" target="_blank" rel="noopener">View this project on the website ↗</a>
         </div>
@@ -235,6 +244,7 @@
       }
       function showProject(p) {
         current = p;
+        closeNameEditor();
         $("#choose").hidden = true;
         $("#project").hidden = false;
         $("#p-title").textContent = p.title;
@@ -246,6 +256,32 @@
         scrollTo(0, 0);
         warmPreview();
       }
+      // Edit project name (the server also renames the folder, so the slug/web address can change)
+      function closeNameEditor() {
+        $("#title-form").hidden = true;
+        $("#title-view").hidden = false;
+      }
+      $("#edit-name").addEventListener("click", () => {
+        $("#title-input").value = current.title;
+        $("#title-view").hidden = true;
+        $("#title-form").hidden = false;
+        $("#title-input").focus();
+        $("#title-input").select();
+      });
+      $("#cancel-name").addEventListener("click", closeNameEditor);
+      $("#title-input").addEventListener("keydown", (e) => { if (e.key === "Escape") closeNameEditor(); });
+      $("#title-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = $("#title-input").value.trim();
+        if (name === current.title) return closeNameEditor();
+        try {
+          const p = await api("PATCH", `/api/projects/${current.slug}`, { title: name });
+          closeNameEditor();
+          showProject(p);
+          toast(`Renamed to “${p.title}”`);
+        } catch (err) { toast(err.message, true); }
+      });
+
       // `next dev` only notices a brand-new project page on its second request, so request it once in the background.
       function warmPreview() {
         fetch(`http://localhost:3000/the-works/${current.slug}/`, { mode: "no-cors" }).catch(() => {});

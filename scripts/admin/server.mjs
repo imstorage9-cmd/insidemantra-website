@@ -245,15 +245,35 @@ async function handle(req, res) {
 
   if (req.method === "GET" && sub === "") return send(res, 200, summary(slug, data));
 
-  // Edit details (name shown on site, city, description, cover)
+  // Edit details (name, city, description, cover)
   if (req.method === "PATCH" && sub === "") {
     const body = await readJson(req);
-    if (typeof body.title === "string" && body.title.trim()) data.title = body.title.trim();
+    let newSlug = slug;
+    if (typeof body.title === "string") {
+      const name = body.title.trim().replace(/\s+/g, " ");
+      if (name.length < 2) throw httpError(400, "Please enter a project name");
+      newSlug = slugify(name);
+      if (!newSlug) throw httpError(400, "Project name needs at least one letter or number");
+      if (newSlug !== slug && fs.existsSync(projectDir(newSlug))) {
+        throw httpError(409, `Another project already uses the name “${name}”. Please choose a different name.`);
+      }
+      data.title = name;
+    }
     if (typeof body.location === "string") data.location = body.location.trim();
     if (typeof body.description === "string") data.description = body.description.trim();
     if (typeof body.cover === "string") data.cover = body.cover;
-    writeProject(slug, data);
-    return send(res, 200, summary(slug, data));
+
+    // A new name also renames the folder, so the web address matches the name.
+    if (newSlug !== slug) {
+      try {
+        fs.renameSync(projectDir(slug), projectDir(newSlug));
+      } catch (err) {
+        console.error(err);
+        throw httpError(409, "Couldn't rename the project folder. It may be open in another program. Close it and try again.");
+      }
+    }
+    writeProject(newSlug, data);
+    return send(res, 200, summary(newSlug, data));
   }
 
   // Add an extra room (Pooja Room, Balcony, ...)

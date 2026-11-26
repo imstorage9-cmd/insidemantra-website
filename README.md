@@ -4,7 +4,7 @@ Marketing website for **Inside Mantra**, an interior design studio (modular inte
 
 The site is built with Next.js and exported as plain static files, so it can be hosted anywhere that serves HTML: Netlify, Vercel, GitHub Pages, S3 or a regular web host.
 
-> **Status:** work in progress. These are built: the home page, The Works (`/the-works/`), individual project pages, and a password-protected photo admin that runs on this computer (`npm run admin`). These pages from the nav don't exist yet: `/services`, `/magazine`, `/about`, `/contact` and `/offerings/<slug>`.
+> **Status:** work in progress. These are built: the home page, The Works (`/the-works/`), individual project pages, and a password-protected photo admin that runs on this computer (`npm run admin`). These pages show a "This page is being built" placeholder, with phone, WhatsApp and email links, until they're built: `/services`, `/magazine`, `/about`, `/contact` and `/offerings/<slug>` (see `components/coming-soon.tsx`). To build one, replace the `<ComingSoon />` in its `page.tsx`.
 
 ## Tech stack
 
@@ -124,6 +124,7 @@ The admin only accepts connections from this computer. A login lasts 12 hours, o
 - You can select many photos at once.
 - For another room, type its name next to **+ Add room** (for example "Pooja Room"), then drop its photos in.
 - Hover over a photo to **Set as cover** (the photo shown on the project card) or **Remove** it.
+- Click **Edit name** next to the project title to rename the project, for example to fix a typo.
 
 Photos show up on the preview at http://localhost:3000 straight away. To put them on the live website, see [Publishing](#publishing).
 
@@ -151,7 +152,7 @@ public/projects/reddy-residence-banjara-hills/
 
 The admin (`scripts/admin/server.mjs`) writes these files directly, and the website preview reads them on every page load.
 
-The project folder name comes from the project name when the project is created, and it becomes the project's web address. Check the spelling before clicking **Create project**. You can change the city, description and cover later, but not the folder name.
+The project folder name comes from the project name, and it becomes the project's web address. Renaming a project with **Edit name** also renames its folder, so the web address changes too. Any links already shared to the old address stop working.
 
 The three default rooms are set in two places, and the keys must match in both:
 
