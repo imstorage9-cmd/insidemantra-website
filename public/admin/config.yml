@@ -4,7 +4,7 @@
 
 backend:
   name: github
-  repo: YOUR-GITHUB-USERNAME/insidemantra-website # ← change after creating the GitHub repo
+  repo: imstorage9-cmd/insidemantra-website
   branch: main
   commit_messages:
     create: "Add project: {{slug}}"
