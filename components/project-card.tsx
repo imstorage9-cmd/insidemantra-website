@@ -1,25 +1,31 @@
+import { ViewTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, MapPin } from "lucide-react";
 import type { Project } from "@/lib/projects";
 
+/** View-transition name shared with the project page's cover, so the photo glides between them. */
+export const projectCoverTransition = (slug: string) => `project-cover-${slug}`;
+
 export function ProjectCard({ project }: { project: Project }) {
   return (
     <Link href={`/the-works/${project.slug}/`} className="group block">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-surface shadow-sm transition-all duration-500 group-hover:-translate-y-1.5 group-hover:shadow-2xl group-hover:shadow-black/15">
-        <span className="absolute inset-0 z-10 flex items-center justify-center bg-black/0 text-sm font-semibold tracking-[0.2em] text-white uppercase opacity-0 transition-all duration-500 group-hover:bg-black/35 group-hover:opacity-100">
-          View project
-        </span>
-        {project.cover && (
-          <Image
-            src={project.cover}
-            alt={project.title}
-            fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-          />
-        )}
-      </div>
+      <ViewTransition name={projectCoverTransition(project.slug)} share="morph" default="none">
+        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-surface shadow-sm transition-all duration-500 group-hover:-translate-y-1.5 group-hover:shadow-2xl group-hover:shadow-black/15">
+          <span className="absolute inset-0 z-10 flex items-center justify-center bg-black/0 font-display text-xs font-semibold tracking-[0.25em] text-white uppercase opacity-0 transition-all duration-500 group-hover:bg-black/35 group-hover:opacity-100">
+            View project
+          </span>
+          {project.cover && (
+            <Image
+              src={project.cover}
+              alt={project.title}
+              fill
+              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            />
+          )}
+        </div>
+      </ViewTransition>
       <h3 className="mt-5 flex items-center gap-2 font-display text-2xl font-normal transition-colors duration-300 group-hover:text-accent">
         {project.title}
         <ArrowRight size={18} className="text-accent transition-transform duration-300 group-hover:translate-x-1.5" />

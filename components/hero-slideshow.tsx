@@ -13,7 +13,7 @@ export function HeroSlideshow({ images }: { images: string[] }) {
   }, [images.length]);
 
   return (
-    <div className="absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+    <div className="hero-parallax absolute inset-0 -z-10 overflow-hidden" aria-hidden>
       {images.map((src, i) => (
         <div
           key={src}

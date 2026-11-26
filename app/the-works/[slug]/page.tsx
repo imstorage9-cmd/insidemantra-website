@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -6,6 +7,8 @@ import { ArrowLeft, ArrowRight, MapPin } from "lucide-react";
 import { getProject, getProjects } from "@/lib/projects";
 import { siteConfig } from "@/config/site";
 import { delay } from "@/lib/motion";
+import { SplitWords } from "@/components/split-words";
+import { projectCoverTransition } from "@/components/project-card";
 
 // Static export: one page per project folder, generated at build time. Unknown slugs 404.
 export const dynamicParams = false;
@@ -38,22 +41,40 @@ export default async function ProjectPage({ params }: PageProps<"/the-works/[slu
       </Link>
 
       <header className="mt-6 max-w-3xl">
-        <h1 className="font-display text-5xl leading-tight font-normal tracking-tight sm:text-6xl">{project.title}</h1>
+        <SplitWords
+          as="h1"
+          text={project.title}
+          onLoad
+          className="font-display text-5xl leading-tight font-normal tracking-tight sm:text-6xl"
+        />
         {project.location && (
-          <p className="mt-3 inline-flex items-center gap-1.5 text-muted">
+          <p className="animate-fade-up mt-3 inline-flex items-center gap-1.5 text-muted" style={delay(300)}>
             <MapPin size={16} aria-hidden /> {project.location}
           </p>
         )}
-        {project.description && <p className="mt-5 text-lg leading-8 text-muted">{project.description}</p>}
+        {project.description && (
+          <p className="animate-fade-up mt-5 text-lg leading-8 text-muted" style={delay(400)}>
+            {project.description}
+          </p>
+        )}
       </header>
 
+      {/* Cover photo: the project card's photo glides into this spot (shared view transition) */}
+      {project.cover && (
+        <ViewTransition name={projectCoverTransition(project.slug)} share="morph" default="none">
+          <div className="relative mt-10 aspect-[16/9] overflow-hidden rounded-3xl bg-surface shadow-xl shadow-black/10">
+            <Image src={project.cover} alt={project.title} fill preload sizes="(min-width: 1152px) 1152px, 100vw" className="object-cover" />
+          </div>
+        </ViewTransition>
+      )}
+
       {project.rooms.length > 1 && (
-        <nav className="mt-8 flex flex-wrap gap-2" aria-label="Rooms">
+        <nav className="mt-10 flex flex-wrap gap-2" aria-label="Rooms">
           {project.rooms.map((room) => (
             <a
               key={room.id}
               href={`#${room.id}`}
-              className="rounded-full border border-line px-4 py-1.5 text-sm hover:border-accent hover:text-accent"
+              className="rounded-full border border-line px-4 py-1.5 text-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-brand hover:bg-brand hover:text-charcoal"
             >
               {room.label} <span className="text-muted">({room.photos.length})</span>
             </a>

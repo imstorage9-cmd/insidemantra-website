@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
 import { Montserrat, PT_Sans } from "next/font/google";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -37,8 +38,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
       <body className="flex min-h-full flex-col font-sans">
+        {/* Thin amber reading-progress line (pure CSS scroll timeline; hidden where unsupported) */}
+        <div className="scroll-progress" aria-hidden />
         <SiteHeader />
-        <main className="flex-1">{children}</main>
+        {/* Soft cross-fade between pages (View Transitions API; no effect where unsupported) */}
+        <ViewTransition>
+          <main className="flex-1">{children}</main>
+        </ViewTransition>
         <SiteFooter />
         <WhatsAppButton />
         <RevealObserver />

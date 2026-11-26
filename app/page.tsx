@@ -21,6 +21,7 @@ import { HeroSlideshow } from "@/components/hero-slideshow";
 import { PhilosophySlider } from "@/components/philosophy-slider";
 import { WordRotator } from "@/components/word-rotator";
 import { LogoMark } from "@/components/logo-mark";
+import { SplitWords } from "@/components/split-words";
 
 // Config entries still holding editor placeholders ("Add number", "Add the full office
 // address…") are hidden from the page until they're filled in with real information.
@@ -45,7 +46,12 @@ function SectionHeading({
         <span className="h-px w-8 bg-brand" aria-hidden />
         {eyebrow}
       </p>
-      <h2 className={`mt-4 font-display text-4xl leading-tight font-normal tracking-tight sm:text-5xl ${light ? "text-white" : ""}`}>{title}</h2>
+      <SplitWords
+        text={title}
+        reveal
+        delayMs={120}
+        className={`mt-4 font-display text-4xl leading-tight font-normal tracking-tight sm:text-5xl ${light ? "text-white" : ""}`}
+      />
       {intro && <p className={`mt-4 text-base leading-7 ${light ? "text-white/70" : "text-muted"}`}>{intro}</p>}
     </div>
   );
@@ -84,19 +90,24 @@ export default function Home() {
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative isolate flex min-h-[620px] items-end overflow-hidden bg-charcoal sm:min-h-[min(calc(100svh-5rem),56rem)]">
+      {/* overflow-clip (not hidden): hidden would make the hero its own scroll container and freeze the scroll-driven drift */}
+      <section className="relative isolate flex min-h-[620px] items-end overflow-clip bg-charcoal sm:min-h-[min(calc(100svh-5rem),56rem)]">
         <HeroSlideshow images={heroImages} />
         <div className="absolute inset-0 -z-0 bg-gradient-to-t from-black/80 via-black/35 to-black/10" />
         <div className="absolute inset-0 -z-0 bg-gradient-to-r from-black/50 to-transparent" />
 
-        <div className="relative mx-auto w-full max-w-6xl px-5 pt-32 pb-20 text-white sm:pb-28">
+        <div className="hero-drift relative mx-auto w-full max-w-6xl px-5 pt-32 pb-20 text-white sm:pb-28">
           <p className="animate-fade-up flex items-center gap-3 text-xs font-display font-semibold uppercase tracking-[0.3em] text-brand" style={delay(100)}>
             <span className="h-px w-10 bg-brand" aria-hidden />
             Interior design studio · Since {siteConfig.foundedYear}
           </p>
-          <h1 className="animate-fade-up mt-5 max-w-3xl font-display text-5xl leading-[1.05] font-normal tracking-tight sm:text-7xl" style={delay(250)}>
-            {hero.heading}
-          </h1>
+          <SplitWords
+            as="h1"
+            text={hero.heading}
+            onLoad
+            delayMs={200}
+            className="mt-5 max-w-3xl font-display text-5xl leading-[1.05] font-normal tracking-tight sm:text-7xl"
+          />
           <p className="animate-fade-up mt-6 max-w-xl text-lg leading-8 text-white/85" style={delay(400)}>
             {hero.subheading}
           </p>
@@ -152,7 +163,15 @@ export default function Home() {
                 className="group relative overflow-hidden rounded-3xl bg-white shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/10"
               >
                 <div className="relative">
-                  <ImageSlot slot={o.image} alt={o.title} className="aspect-[16/10]" sizes="(min-width: 640px) 50vw, 100vw" zoomOnHover />
+                  <ImageSlot
+                    slot={o.image}
+                    alt={o.title}
+                    className="aspect-[16/10]"
+                    sizes="(min-width: 640px) 50vw, 100vw"
+                    zoomOnHover
+                    curtain
+                    revealDelay={150 + (i % 2) * 120}
+                  />
                   <span className="hexagon absolute right-5 -bottom-7 flex h-14 w-14 items-center justify-center bg-brand font-display text-lg font-semibold text-charcoal transition-transform duration-500 group-hover:rotate-[30deg]">
                     <span className="transition-transform duration-500 group-hover:-rotate-[30deg]">{String(i + 1).padStart(2, "0")}</span>
                   </span>
@@ -309,6 +328,8 @@ export default function Home() {
                     className="aspect-[3/2]"
                     sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                     zoomOnHover
+                    curtain
+                    revealDelay={100 + (i % 3) * 120}
                   />
                   <span className="absolute right-4 bottom-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold tracking-[0.15em] text-charcoal backdrop-blur transition-colors duration-300 group-hover:bg-brand">
                     STEP {i + 1}
@@ -346,7 +367,12 @@ export default function Home() {
         <div className="grid overflow-hidden rounded-[2rem] shadow-2xl shadow-black/10 lg:grid-cols-[1.3fr_1fr]" data-reveal="zoom">
           <div className="relative overflow-hidden bg-brand p-10 text-charcoal sm:p-14">
             <LogoMark className="pointer-events-none absolute -right-10 -bottom-10 h-48 w-48 opacity-25 mix-blend-overlay" spin />
-            <h2 className="relative font-display text-4xl leading-tight font-normal tracking-tight sm:text-5xl">Let’s talk about your space</h2>
+            <SplitWords
+              text="Let’s talk about your space"
+              reveal
+              delayMs={250}
+              className="relative font-display text-4xl leading-tight font-normal tracking-tight sm:text-5xl"
+            />
             <p className="relative mt-4 max-w-md leading-7 text-charcoal/80">
               Book a free consultation. Tell us about your home, your plans and your budget, and we’ll show you what’s
               possible.
