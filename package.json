@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "cms": "npx decap-server"
+    "admin": "node scripts/admin/server.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.81.0",

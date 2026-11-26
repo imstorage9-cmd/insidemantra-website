@@ -4,7 +4,7 @@ Marketing website for **Inside Mantra**, an interior design studio (modular inte
 
 The site is built with Next.js and exported as plain static files, so it can be hosted anywhere that serves HTML: Netlify, Vercel, GitHub Pages, S3 or a regular web host.
 
-> **Status:** work in progress. These pages are built: the home page, The Works (`/the-works/`), individual project pages, and the photo upload panel (`/admin/`). These pages from the nav don't exist yet: `/services`, `/magazine`, `/about`, `/contact` and `/offerings/<slug>`.
+> **Status:** work in progress. These are built: the home page, The Works (`/the-works/`), individual project pages, and a password-protected photo admin that runs on this computer (`npm run admin`). These pages from the nav don't exist yet: `/services`, `/magazine`, `/about`, `/contact` and `/offerings/<slug>`.
 
 ## Tech stack
 
@@ -36,6 +36,7 @@ Then open http://localhost:3000.
 | `npm run build` | Builds the static site into `out/` |
 | `npm run start` | Runs `next start`. This isn't needed for a static export: serve `out/` instead |
 | `npm run lint` | Runs ESLint |
+| `npm run admin` | Starts the photo admin at http://localhost:3001 (see "Uploading project photos") |
 
 ## Project structure
 
@@ -49,10 +50,10 @@ lib/
   images.ts     Finds optional image "slots" in public/images/
   projects.ts   Reads project folders in public/projects/
 public/
-  admin/        Photo upload panel (Decap CMS): index.html + config.yml
   images/       Fixed photo spots on the pages (exact file names)
-  projects/     One folder per project, managed through /admin
-netlify.toml    Netlify build settings
+  projects/     One folder per project, managed through the photo admin
+scripts/admin/  Photo admin: server.mjs (Node, no extra packages), login.html, app.html
+.env.local      Admin password (ADMIN_PASSWORD). Not committed.
 ```
 
 ## Editing content
@@ -89,24 +90,49 @@ Example: to add the first hero image, save it as `public/images/hero/slide-1.jpg
 
 ## Uploading project photos
 
-Project photos are added through an upload panel at **`/admin/`** on the live site (for example `https://insidemantra.com/admin/`). The team doesn't need to touch any code or folders.
+Project photos are added through a password-protected **photo admin** that runs on this computer. You don't need to touch any code or folders, and you don't need a GitHub or Netlify account.
 
-### For the team: adding photos
+### Starting the admin
 
-1. Go to `<site>/admin/` and click **Login with GitHub**.
-2. You'll see the list of projects already on the website.
-   - **Project already on the website:** click its name.
-   - **New project:** click **New Project** and type the **Project name**, for example "Reddy Residence, Banjara Hills".
-3. Every project has three photo sections: **Kitchen photos**, **Bedroom photos** and **Living Room photos**. In the section the photos belong to, click **Add photo**, then upload the photo. Repeat for each photo.
-4. For any other room (Pooja Room, Kids Room, Balcony and so on), use **Other rooms**: click **Add room**, type the room name, then add its photos.
-5. Optionally choose a **City**, a **Cover photo** and a **Short description**.
-6. Click **Publish**, then **Publish now**. The website updates by itself in about 1–2 minutes.
+The first time only, create a file named `.env.local` in the project folder containing:
+
+```
+ADMIN_PASSWORD=choose-a-strong-password
+```
+
+This file is ignored by git, so the password never goes to GitHub.
+
+Then start the website preview and the admin, each in its own terminal:
+
+```bash
+npm run dev      # website preview → http://localhost:3000
+npm run admin    # photo admin     → http://localhost:3001
+```
+
+Open http://localhost:3001 and log in with the password.
+
+The admin only accepts connections from this computer. A login lasts 12 hours, or until the admin is restarted.
+
+### Adding photos
+
+**Step 1: choose the project.**
+- **Project already on the website:** click it under **Existing project**.
+- **New project:** fill in **New project**: the project name (for example "Reddy Residence, Banjara Hills"), the city, and optionally a short description. Then click **Create project**. Kitchen, Bedroom and Living Room sections are created automatically.
+
+**Step 2: add photos.**
+- Drag photos onto the room they belong to, or click the room's box to choose them.
+- You can select many photos at once.
+- For another room, type its name next to **+ Add room** (for example "Pooja Room"), then drop its photos in.
+- Hover over a photo to **Set as cover** (the photo shown on the project card) or **Remove** it.
+
+Photos show up on the preview at http://localhost:3000 straight away. To put them on the live website, see [Publishing](#publishing).
 
 Things to know:
 
-- **Empty sections are hidden.** A section with no photos doesn't appear on the website, so it's fine to fill in only the rooms you have.
-- **Newest projects first.** The website shows projects by their **Date**, and the home page shows the 3 newest.
-- **Resize photos first.** Shrink large camera photos to about 2000px wide before uploading.
+- **Empty rooms are hidden.** A room with no photos doesn't appear on the website, so it's fine to fill in only the rooms you have.
+- **Newest projects first.** The home page shows the 3 newest projects.
+- **Photos are resized automatically.** Large photos are scaled to 2000px wide and saved as JPG before upload.
+- **iPhone HEIC photos aren't supported.** Export them as JPG, or set the iPhone to **Settings → Camera → Formats → Most Compatible**.
 
 ### What happens behind the scenes
 
@@ -123,42 +149,34 @@ public/projects/reddy-residence-banjara-hills/
 - **The Works** (`/the-works/`) shows every project that has at least one photo.
 - Each project gets its own page (`/the-works/<project-folder>/`), with photos grouped by room.
 
-When someone clicks **Publish**, the panel saves the changes to the GitHub repo. Netlify sees the new commit, rebuilds the site and puts it live.
+The admin (`scripts/admin/server.mjs`) writes these files directly, and the website preview reads them on every page load.
 
-The project folder name comes from the project name when the project is first saved, and it becomes the project's web address. Check the spelling before the first save.
+The project folder name comes from the project name when the project is created, and it becomes the project's web address. Check the spelling before clicking **Create project**. You can change the city, description and cover later, but not the folder name.
 
 The three default rooms are set in two places, and the keys must match in both:
 
 - `DEFAULT_ROOMS` in `lib/projects.ts`
-- `public/admin/config.yml`
+- `DEFAULT_ROOMS` in `scripts/admin/server.mjs`
 
-### One-time setup
+## Publishing
 
-The panel logs people in with GitHub, so each person who uploads needs a free GitHub account with access to the repo.
+Uploads only change files on this computer. Two separate steps get them out:
 
-1. **GitHub:** create a repo, for example `insidemantra-website`, and push this project to its `main` branch. Then edit `public/admin/config.yml` and change `repo:` to `<your-github-username>/insidemantra-website`.
-2. **Netlify:** choose **Add new site → Import from Git**, then pick the repo. The build settings are read from `netlify.toml` (`npm run build`, publish `out`).
-3. **Login:**
-   - In GitHub, go to **Settings → Developer settings → OAuth Apps → New OAuth App**. Set the callback URL to `https://api.netlify.com/auth/done`.
-   - In Netlify, go to **Site configuration → Access & security → OAuth**, choose **Install provider → GitHub**, and paste the Client ID and Client Secret from the OAuth app.
-4. **Team access:** in GitHub, go to the repo's **Settings → Collaborators** and invite each person who should be able to upload.
-
-### Trying the panel on this computer
+**1. Back up to GitHub.** This saves the photos and code, but doesn't change the live site:
 
 ```bash
-npm run dev    # terminal 1
-npm run cms    # terminal 2: local upload server (no login needed)
+git add public/projects
+git commit -m "Add photos: <project name>"
+git push
 ```
 
-Then open http://localhost:3000/admin/index.html. Changes are written straight into `public/projects/` on this computer, and you see them after refreshing the site. Locally, `/admin/` without `index.html` returns a 404. On Netlify, `/admin/` works.
-
-## Deployment
+**2. Update the live website:**
 
 ```bash
 npm run build
 ```
 
-This writes a fully static site to `out/`. Upload the contents of that folder to any static host.
+This writes a fully static site to `out/`. Upload the contents of that folder to your web host.
 
 The export has two settings to be aware of:
 

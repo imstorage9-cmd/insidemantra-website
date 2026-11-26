@@ -219,7 +219,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Recent work (only once projects have been added via /admin) */}
+      {/* Recent work (only once projects have been added via the photo admin) */}
       {recentProjects.length > 0 && (
         <section className="mx-auto max-w-6xl px-5 py-20 sm:py-28">
           <div className="flex flex-wrap items-end justify-between gap-4">

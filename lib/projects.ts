@@ -2,9 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 
 // Every project lives in its own folder: public/projects/<slug>/
-//   index.json  – details + which photo belongs to which room (written by the /admin panel)
+//   index.json  – details + which photo belongs to which room (written by the photo admin)
 //   *.jpg       – the photos themselves
-// The admin panel (public/admin/config.yml) is what creates and edits these folders.
+// The photo admin (scripts/admin/server.mjs, `npm run admin`) creates and edits these folders.
 
 const PROJECTS_DIR = path.join(process.cwd(), "public", "projects");
 
