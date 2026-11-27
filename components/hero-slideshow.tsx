@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-/** Cross-fades between the hero images with a slow "Ken Burns" zoom. Renders nothing if there are none. */
-export function HeroSlideshow({ images }: { images: string[] }) {
+/** Hero background: cross-fades between images (if more than one) with a slow "Ken Burns" zoom. */
+export function HeroSlideshow({ images, imageClassName = "" }: { images: string[]; imageClassName?: string }) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export function HeroSlideshow({ images }: { images: string[] }) {
             src={src}
             alt=""
             fetchPriority={i === 0 ? "high" : "auto"}
-            className={`h-full w-full object-cover ${i === index ? "animate-kenburns" : ""}`}
+            className={`h-full w-full object-cover ${imageClassName} ${i === index ? "animate-kenburns" : ""}`}
           />
         </div>
       ))}

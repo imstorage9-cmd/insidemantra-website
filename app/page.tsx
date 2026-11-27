@@ -77,12 +77,14 @@ export default function Home() {
     beYou,
   } = siteConfig;
 
-  const heroSlides = Array.from({ length: hero.slideCount }, (_, i) => resolveImage(`hero/slide-${i + 1}`)).filter(
-    (src): src is string => src !== null
+  // Hero slideshow: public/images/hero/slide-1.jpg, slide-2.jpg, … (add more to extend it)
+  const heroSlides = Array.from({ length: 10 }, (_, i) => resolveImage(`hero/slide-${i + 1}`)).filter(
+    (s): s is string => Boolean(s),
   );
-  // No hero photos yet → show the shared placeholder photo instead of a blank banner.
-  const placeholder = resolveImage(PLACEHOLDER_SLOT);
-  const heroImages = heroSlides.length ? heroSlides : placeholder ? [placeholder] : [];
+  if (heroSlides.length === 0) {
+    const fallback = resolveImage(PLACEHOLDER_SLOT);
+    if (fallback) heroSlides.push(fallback);
+  }
   const realStats = stats.filter((s) => !isPlaceholder(s.value));
   const realTrophies = trophies.filter((t) => !isPlaceholder(t.title));
   const recentProjects = getProjects().slice(0, 3);
@@ -91,23 +93,31 @@ export default function Home() {
     <>
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       {/* overflow-clip (not hidden): hidden would make the hero its own scroll container and freeze the scroll-driven drift */}
-      <section className="relative isolate flex min-h-[620px] items-end overflow-clip bg-charcoal sm:min-h-[min(calc(100svh-5rem),56rem)]">
-        <HeroSlideshow images={heroImages} />
-        <div className="absolute inset-0 -z-0 bg-gradient-to-t from-black/80 via-black/35 to-black/10" />
-        <div className="absolute inset-0 -z-0 bg-gradient-to-r from-black/50 to-transparent" />
+      <section className="relative isolate flex min-h-[620px] items-center overflow-clip bg-charcoal sm:min-h-[min(calc(100svh-5rem),56rem)]">
+        {heroSlides.length > 0 && <HeroSlideshow images={heroSlides} />}
+        {/* Dark fade on the left keeps the white text readable over any photo */}
+        <div className="absolute inset-0 -z-0 bg-gradient-to-r from-black/80 from-10% via-black/55 via-50% to-black/15" />
+        <div className="absolute inset-x-0 bottom-0 -z-0 h-40 bg-gradient-to-t from-black/40 to-transparent" />
 
-        <div className="hero-drift relative mx-auto w-full max-w-6xl px-5 pt-32 pb-20 text-white sm:pb-28">
+        <div className="hero-drift relative mx-auto w-full max-w-6xl px-5 pt-24 pb-24 text-white sm:pb-28">
           <p className="animate-fade-up flex items-center gap-3 text-xs font-display font-semibold uppercase tracking-[0.3em] text-brand" style={delay(100)}>
             <span className="h-px w-10 bg-brand" aria-hidden />
             Interior design studio · Since {siteConfig.foundedYear}
           </p>
-          <SplitWords
-            as="h1"
-            text={hero.heading}
-            onLoad
-            delayMs={200}
-            className="mt-5 max-w-3xl font-display text-5xl leading-[1.05] font-normal tracking-tight sm:text-7xl"
-          />
+          {/* "Be" rises in on load, then the last word keeps cycling (words in config/site.ts → beYou) */}
+          <h1
+            aria-label={beYou.words.map((w) => `Be ${w.replace(/!$/, "")}`).join(". ") + "."}
+            className="mt-5 font-display text-6xl leading-[1.05] font-normal tracking-tight sm:text-8xl"
+          >
+            <span aria-hidden className="animate-words" style={delay(200)}>
+              <span className="split-word">
+                <span>Be</span>
+              </span>
+            </span>{" "}
+            <span aria-hidden className="animate-fade-up inline-block text-brand" style={delay(500)}>
+              <WordRotator words={beYou.words} interval={2400} className="font-semibold" />
+            </span>
+          </h1>
           <p className="animate-fade-up mt-6 max-w-xl text-lg leading-8 text-white/85" style={delay(400)}>
             {hero.subheading}
           </p>
@@ -117,7 +127,7 @@ export default function Home() {
             </Link>
             <a
               href={`tel:${contact.phoneDialable}`}
-              className="group inline-flex items-center gap-2 rounded-full border border-white/40 px-7 py-3.5 font-medium backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white hover:bg-white hover:text-charcoal"
+              className="group inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-7 py-3.5 font-medium backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white hover:bg-white hover:text-charcoal"
             >
               <Phone size={18} className="transition-transform duration-300 group-hover:rotate-12" /> {contact.phone}
             </a>
@@ -125,7 +135,7 @@ export default function Home() {
         </div>
 
         <a
-          href="#philosophy"
+          href="#what-we-do"
           aria-label="Scroll down"
           className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 text-[10px] tracking-[0.3em] text-white/70 uppercase transition-colors hover:text-brand sm:flex"
         >
@@ -134,20 +144,8 @@ export default function Home() {
         </a>
       </section>
 
-      {/* ── Philosophy (rotating quotes) ─────────────────────────────────── */}
-      <section id="philosophy" className="relative overflow-hidden px-5 py-24 sm:py-32">
-        <LogoMark spin className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 opacity-[0.07] sm:h-[28rem] sm:w-[28rem]" />
-        <LogoMark className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 opacity-[0.05]" />
-        <div className="relative mx-auto max-w-4xl" data-reveal>
-          <PhilosophySlider quotes={philosophyQuotes} />
-        </div>
-        <p className="relative mx-auto mt-14 max-w-2xl text-center leading-8 text-muted" data-reveal style={delay(150)}>
-          {siteConfig.mission}
-        </p>
-      </section>
-
       {/* ── Offerings ────────────────────────────────────────────────────── */}
-      <section className="bg-surface py-20 sm:py-28">
+      <section id="what-we-do" className="scroll-mt-16 bg-surface py-20 sm:py-28">
         <div className="mx-auto max-w-6xl px-5">
           <SectionHeading
             eyebrow="What we do"
@@ -169,8 +167,6 @@ export default function Home() {
                     className="aspect-[16/10]"
                     sizes="(min-width: 640px) 50vw, 100vw"
                     zoomOnHover
-                    curtain
-                    revealDelay={150 + (i % 2) * 120}
                   />
                   <span className="hexagon absolute right-5 -bottom-7 flex h-14 w-14 items-center justify-center bg-brand font-display text-lg font-semibold text-charcoal transition-transform duration-500 group-hover:rotate-[30deg]">
                     <span className="transition-transform duration-500 group-hover:-rotate-[30deg]">{String(i + 1).padStart(2, "0")}</span>
@@ -198,17 +194,6 @@ export default function Home() {
               </article>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ── Be You banner ────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-brand px-5 py-20 text-charcoal sm:py-24">
-        <LogoMark className="pointer-events-none absolute top-1/2 -right-16 h-72 w-72 -translate-y-1/2 opacity-20 mix-blend-overlay" spin />
-        <div className="relative mx-auto max-w-6xl" data-reveal>
-          <p className="max-w-xl text-lg leading-8 font-medium">{beYou.lead}</p>
-          <p className="mt-6 font-display text-6xl leading-none font-normal tracking-tight sm:text-8xl">
-            Be <WordRotator words={beYou.words} className="font-semibold" />
-          </p>
         </div>
       </section>
 
@@ -328,8 +313,6 @@ export default function Home() {
                     className="aspect-[3/2]"
                     sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                     zoomOnHover
-                    curtain
-                    revealDelay={100 + (i % 3) * 120}
                   />
                   <span className="absolute right-4 bottom-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold tracking-[0.15em] text-charcoal backdrop-blur transition-colors duration-300 group-hover:bg-brand">
                     STEP {i + 1}
@@ -341,6 +324,18 @@ export default function Home() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ── Philosophy (rotating quotes) ─────────────────────────────────── */}
+      <section id="philosophy" className="relative overflow-hidden px-5 py-24 sm:py-32">
+        <LogoMark spin className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 opacity-[0.07] sm:h-[28rem] sm:w-[28rem]" />
+        <LogoMark className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 opacity-[0.05]" />
+        <div className="relative mx-auto max-w-4xl" data-reveal>
+          <PhilosophySlider quotes={philosophyQuotes} />
+        </div>
+        <p className="relative mx-auto mt-14 max-w-2xl text-center leading-8 text-muted" data-reveal style={delay(150)}>
+          {siteConfig.mission}
+        </p>
       </section>
 
       {/* ── Recent work (only once projects have been added via the photo admin) ── */}

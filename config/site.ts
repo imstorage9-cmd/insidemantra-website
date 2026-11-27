@@ -74,20 +74,17 @@ export const siteConfig = {
     { label: "What we believe", text: "Design is not for philosophy, it's for life." },
   ],
 
-  // "Be ___" banner: the last word cycles through these
+  // Home page hero heading: "Be ___", where the last word cycles through these
   beYou: {
-    lead: "Be faithful to your own taste, because nothing you really like is ever out of style.",
-    words: ["Different", "Creative", "Bold", "You!"],
+    words: ["Creative", "Bold", "You!"],
   },
 
   consultationCtaText: "Book Free Consultation",
   consultationHref: "/contact",
 
   hero: {
-    heading: "Home to beautiful interiors",
     subheading:
       "Affordable, thoughtfully designed interiors for homes and offices — from concept to move-in.",
-    slideCount: 3, // looks for public/images/hero/slide-1, slide-2, slide-3
   },
 
   offerings: [

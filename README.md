@@ -91,12 +91,12 @@ The slot names come from `config/site.ts`:
 
 | Slot | Used for |
 |---|---|
-| `hero/slide-1` … `hero/slide-N` | Hero slideshow (N = `hero.slideCount`) |
+| `hero/slide-1`, `hero/slide-2`, … | Home page hero slideshow. Slides cross-fade every 7 seconds; add `slide-3.jpg` and so on to extend it (up to 10). White text sits over a dark fade on the left. |
 | `offerings/<slug>` | Offering cards, e.g. `offerings/modular-interiors` |
 | `services/kitchen`, `services/wardrobe`, `services/storage` | Service tiles |
 | `crafting/<step>` | Crafting steps, e.g. `crafting/quality-checks` |
 
-Example: to add the first hero image, save it as `public/images/hero/slide-1.jpg`.
+Example: to change the first hero photo, replace `public/images/hero/slide-1.jpg`.
 
 **Placeholder photo:** any spot without its own photo shows `public/images/placeholder.jpg` instead. In the local preview (`npm run dev`), each of those spots has a small label naming the file it's waiting for. Visitors to the published site don't see these labels. When you add a real photo with that file name, it replaces the placeholder in that spot.
 
